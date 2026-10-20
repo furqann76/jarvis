@@ -1,0 +1,84 @@
+# Jarvis settings. Override location with the JARVIS_CONFIG environment variable,
+# or place a copy at ~/.config/jarvis/settings.toml.
+
+[ollama]
+host = "http://localhost:11434"
+# qwen3:8b with thinking is the most reliable at multi-step desktop tasks (~5 s for simple
+# commands, longer for complex ones). For speed instead of reliability use
+# think = false, or model = "qwen2.5:7b-instruct-q4_K_M" with think commented out.
+model = "qwen3:8b"
+think = true
+temperature = 0.2
+num_ctx = 16384
+request_timeout_s = 300
+
+[agent]
+max_iterations = 12        # LLM planning rounds per task
+max_failures = 3           # failed/unverified tool calls tolerated before the task FAILS
+check_answers = true       # double-check final answers against tool results
+
+[storage]
+database_path = "~/.local/share/jarvis/jarvis.db"
+
+[permissions.filesystem]
+allowed_paths = [
+    "~/Downloads",
+    "~/Documents",
+    "~/Desktop",
+    "/tmp/jarvis_workspace",
+]
+deny_patterns = [
+    "~/.ssh/*",
+    "~/.bashrc",
+    "/etc/*",
+    "/usr/*",
+]
+# Where trash_file moves items (XDG home trash).
+trash_dir = "~/.local/share/Trash"
+
+[permissions.browser]
+allowed_schemes = ["http", "https"]
+blocked_domains = []          # e.g. ["bank.example.com"]; subdomains are blocked too
+allow_private_network = false # localhost / LAN addresses
+
+[permissions.desktop]
+# Typing/clicking in these apps always requires approval (a terminal can run anything).
+protected_applications = [
+    "org.gnome.Terminal", "gnome-terminal-server", "kgx", "ptyxis", "konsole", "xterm",
+    "code", "gnome-control-center", "org.gnome.Settings",
+]
+
+[permissions.applications]
+blocked_applications = []     # desktop-file IDs or names launch_application refuses
+
+[voice]
+enabled = true
+stt_model = "small.en"        # or "medium.en" for better accuracy
+stt_device = "cuda"           # falls back to CPU automatically
+stt_compute_type = "float16"
+language = "en"
+max_record_seconds = 30
+# Jarvis-style voice: Kokoro British male blend (closest to J.A.R.V.I.S. in testing).
+# Other options: "bm_daniel", "bm_george", "bm_lewis", "bm_fable", or any "name:weight,..." blend.
+tts_engine = "kokoro"
+kokoro_voice = "bm_daniel:0.6,bm_lewis:0.4"
+kokoro_speed = 0.9
+# Fallback engine (tts_engine = "piper"):
+tts_voice = "~/.local/share/jarvis/voices/en_US-lessac-medium.onnx"
+speak_responses = true
+max_spoken_chars = 600
+
+[browser]
+headless = false
+profile_dir = "~/.local/share/jarvis/browser-profile"
+navigation_timeout_ms = 30000
+
+[desktop]
+# Mouse/keyboard go through the GNOME RemoteDesktop portal (asks once, then remembers).
+vision_model = "qwen2.5vl:7b" # sees the screen for look_at_screen / click_on_screen
+portal_token_file = "~/.local/share/jarvis/portal_restore_token"
+
+[ui]
+# On Wayland, run the window through XWayland so "Hey Jarvis" can bring it to the front
+# (GNOME won't let native Wayland windows raise themselves from the background).
+prefer_x11 = true
